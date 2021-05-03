@@ -55,6 +55,11 @@ namespace TrailerDownloader.SignalRHubs
             {
                 foreach (string movieDirectory1 in Directory.GetDirectories(movieDirectory))
                 {
+                    if ((new DirectoryInfo(movieDirectory1).Attributes & FileAttributes.Hidden) == FileAttributes.Hidden)
+                    {
+                        continue;
+                    }
+
                     Movie movie = GetMovieFromDirectory(movieDirectory1);
                     if (movie == null)
                     {
