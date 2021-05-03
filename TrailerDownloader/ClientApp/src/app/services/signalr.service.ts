@@ -46,7 +46,7 @@ export class SignalrService {
   }
 
   downloadAllTrailers(movieList: Array<Movie>) {
-    this.hubConnection.invoke('downloadAllTrailers', movieList).catch(err => console.log(err));
+    this.hubConnection.invoke('downloadAllTrailers', movieList, true).catch(err => console.log(err));
   }
 
   deleteAllTrailersListener = () => {
@@ -68,7 +68,7 @@ export class SignalrService {
   }
 
   private getAllMoviesInfo() {
-    this.hubConnection.invoke('getAllMoviesInfo').catch(err => console.log(err));
+    this.hubConnection.invoke('getAllMoviesInfo', true).catch(err => console.log(err));
   }
 
   private completedAllMoviesInfoListener = () => {

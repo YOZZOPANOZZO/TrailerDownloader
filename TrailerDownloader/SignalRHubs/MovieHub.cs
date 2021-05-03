@@ -26,7 +26,7 @@ namespace TrailerDownloader.SignalRHubs
 
         private static readonly string _apiKey = "e438e2812f17faa299396505f2b375bb";
         private static readonly string _configPath = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
-        private static readonly List<string> _excludedFileExtensions = new List<string>() { ".srt", ".sub", ".sbv", ".ssa", ".SRT2UTF-8", ".STL", ".png", ".jpg", ".jpeg", ".png", ".gif", ".svg", ".tif", ".tif", ".txt", ".nfo" };
+        private static readonly List<string> _excludedFileExtensions = new List<string>() { ".srt", ".sub", ".sbv", ".ssa", ".SRT2UTF-8", ".STL", ".png", ".jpg", ".jpeg", ".png", ".gif", ".svg", ".tif", ".tif", ".txt", ".nfo", ".DS_Store" };
         private static string _mainMovieDirectory;
         private static string _trailerLanguage;
         private static readonly List<string> _movieDirectories = new List<string>();
@@ -46,7 +46,7 @@ namespace TrailerDownloader.SignalRHubs
             }
         }
 
-        public async void GetAllMoviesInfo()
+        public async Task<IEnumerable<Movie>> GetAllMoviesInfo(bool sendToClient = true)
         {
             GetMovieDirectories(_mainMovieDirectory);
             List<Task<Movie>> taskList = new List<Task<Movie>>();
@@ -62,14 +62,17 @@ namespace TrailerDownloader.SignalRHubs
                         continue;
                     }
 
-                    if (_movieDictionary.TryGetValue(movie.Title, out Movie dictionaryMovie))
+                    if (_movieDictionary.TryGetValue(movie.FilePath, out Movie dictionaryMovie))
                     {
                         dictionaryMovie.TrailerExists = movie.TrailerExists;
-                        await _hubContext.Clients.All.SendAsync("getAllMoviesInfo", dictionaryMovie);
+                        if (sendToClient)
+                        {
+                            await _hubContext.Clients.All.SendAsync("getAllMoviesInfo", dictionaryMovie);
+                        }
                     }
                     else
                     {
-                        taskList.Add(GetMovieInfoAsync(movie));
+                        taskList.Add(GetMovieInfoAsync(movie, sendToClient));
                     }
                 }
             }
@@ -87,7 +90,12 @@ namespace TrailerDownloader.SignalRHubs
                 }
             });
 
-            await _hubContext.Clients.All.SendAsync("completedAllMoviesInfo", _movieDictionary.Count);
+            if (sendToClient)
+            {
+                await _hubContext.Clients.All.SendAsync("completedAllMoviesInfo", _movieDictionary.Count);
+            }
+
+            return _movieDictionary.Select(x => x.Value).ToList();
         }
 
         private void GetMovieDirectories(string directoryPath)
@@ -143,13 +151,13 @@ namespace TrailerDownloader.SignalRHubs
             };
         }
 
-        public async void DownloadAllTrailers(IEnumerable<Movie> movieList)
+        public async Task DownloadAllTrailers(IEnumerable<Movie> movieList, bool sendToClient = true)
         {
             foreach (Movie movie in movieList.OrderBy(movie => movie.Title))
             {
                 if (movie.TrailerExists == false && string.IsNullOrEmpty(movie.TrailerURL) == false)
                 {
-                    if (DownloadTrailerAsync(movie).Result)
+                    if (await DownloadTrailerAsync(movie, sendToClient))
                     {
                         movie.TrailerExists = true;
                         await _hubContext.Clients.All.SendAsync("downloadAllTrailers", movie);
@@ -157,7 +165,10 @@ namespace TrailerDownloader.SignalRHubs
                 }
             }
 
-            await _hubContext.Clients.All.SendAsync("doneDownloadingAllTrailersListener", true);
+            if (sendToClient)
+            {
+                await _hubContext.Clients.All.SendAsync("doneDownloadingAllTrailersListener", true);
+            }
         }
 
         public bool DeleteAllTrailers(IEnumerable<Movie> movieList)
@@ -177,7 +188,7 @@ namespace TrailerDownloader.SignalRHubs
             return result.IsCompleted;
         }
 
-        private async Task<bool> DownloadTrailerAsync(Movie movie)
+        private async Task<bool> DownloadTrailerAsync(Movie movie, bool sendToClient)
         {
             try
             {
@@ -200,12 +211,15 @@ namespace TrailerDownloader.SignalRHubs
             catch (Exception ex)
             {
                 _logger.LogError($"Error downloading trailer for {movie.Title}\n{ex.Message}");
-                await _hubContext.Clients.All.SendAsync("downloadAllTrailers", movie);
+                if (sendToClient)
+                {
+                    await _hubContext.Clients.All.SendAsync("downloadAllTrailers", movie);
+                }
                 return false;
             }
         }
 
-        private async Task<Movie> GetMovieInfoAsync(Movie movie)
+        private async Task<Movie> GetMovieInfoAsync(Movie movie, bool sendToClient)
         {
             try
             {
@@ -231,7 +245,10 @@ namespace TrailerDownloader.SignalRHubs
                     }
 
                     movie.TrailerURL = await GetTrailerURL(movie.Id);
-                    await _hubContext.Clients.All.SendAsync("getAllMoviesInfo", movie);
+                    if (sendToClient)
+                    {
+                        await _hubContext.Clients.All.SendAsync("getAllMoviesInfo", movie);
+                    }
 
                     movie = _movieDictionary.GetOrAdd(movie.FilePath, movie);
                     return movie;

@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using TrailerDownloader.Repositories;
+using TrailerDownloader.Services;
 using TrailerDownloader.SignalRHubs;
 
 namespace TrailerDownloader
@@ -41,6 +42,7 @@ namespace TrailerDownloader
                 configuration.RootPath = "ClientApp/dist";
             });
 
+            services.AddScoped<IAutoDownloadService, AutoDownloadService>();
             services.AddScoped<IConfigRepository, ConfigRepository>();
             services.AddScoped<ITrailerRepository, MovieHub>();
 
