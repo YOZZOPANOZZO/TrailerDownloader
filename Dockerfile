@@ -27,4 +27,5 @@ RUN dotnet publish "TrailerDownloader.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+ADD . /config
 ENTRYPOINT ["dotnet", "TrailerDownloader.dll"]

@@ -6,7 +6,7 @@ namespace TrailerDownloader.Repositories
 {
     public class ConfigRepository : IConfigRepository
     {
-        private static readonly string _configPath = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
+        private static readonly string _configPath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).FullName, "config", "config.json");
 
         public Config GetConfig()
         {

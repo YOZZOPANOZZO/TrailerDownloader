@@ -25,7 +25,7 @@ namespace TrailerDownloader.SignalRHubs
         private static readonly ConcurrentDictionary<string, Movie> _movieDictionary = new ConcurrentDictionary<string, Movie>();
 
         private static readonly string _apiKey = "e438e2812f17faa299396505f2b375bb";
-        private static readonly string _configPath = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
+        private static readonly string _configPath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).FullName, "config", "config.json");
         private static readonly List<string> _excludedFileExtensions = new List<string>() { ".srt", ".sub", ".sbv", ".ssa", ".SRT2UTF-8", ".STL", ".png", ".jpg", ".jpeg", ".png", ".gif", ".svg", ".tif", ".tif", ".txt", ".nfo", ".DS_Store" };
         private static string _mainMovieDirectory;
         private static string _trailerLanguage;
