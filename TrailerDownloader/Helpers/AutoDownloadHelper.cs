@@ -1,18 +1,19 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
 using TrailerDownloader.SignalRHubs;
 
 namespace TrailerDownloader.Helpers
 {
     public static class AutoDownloadHelper
     {
-        public static void Start()
+        public static void Start(IHubContext<MovieHub> hubContext)
         {
             Task.Run(async () =>
             {
                 while (true)
                 {
-                    var movieHub = new MovieHub();
+                    var movieHub = new MovieHub(hubContext);
                     var movies = await movieHub.GetAllMoviesInfo();
                     movieHub.DownloadAllTrailers(movies);
 

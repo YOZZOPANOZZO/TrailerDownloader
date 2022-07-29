@@ -6,6 +6,7 @@ namespace TrailerDownloader.Models.DTOs
     [DataContract]
     public class TMDBTrailerResDto
     {
+        [DataMember(Name = "results")]
         public IEnumerable<TMDBTrilerDto> Trailers { get; set; }
     }
 

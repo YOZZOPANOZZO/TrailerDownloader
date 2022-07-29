@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
 import { NgForm } from '@angular/forms';
+import { Setup } from '../models/setup';
 
 @Injectable({
   providedIn: 'root'
@@ -15,8 +16,8 @@ export class ConfigService {
     return this.http.get(this.configEndpoint);
   }
 
-  saveConfig(form: NgForm) {
-    return this.http.post(this.configEndpoint, form);
+  saveConfig(setup: Setup) {
+    return this.http.post(this.configEndpoint, setup);
   }
 
 }

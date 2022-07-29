@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { Setup } from '../models/setup';
 import { ConfigService } from '../services/config.service';
 
 @Component({
@@ -19,7 +20,10 @@ export class SetupComponent implements OnInit {
 
   onSubmit(form: NgForm) {
     if (form.valid) {
-      this.configService.saveConfig(form.value).subscribe(res => {
+      let setup = <Setup>form.value;
+      setup.autoDownload = !setup.autoDownload ? false : setup.autoDownload;
+
+      this.configService.saveConfig(setup).subscribe(res => {
         if (res === true) {
           this.toastr.success('Configuration saved', 'Success!');
           this.router.navigate(['movies']);
@@ -33,5 +37,5 @@ export class SetupComponent implements OnInit {
       });
     }
   }
-  
+
 }

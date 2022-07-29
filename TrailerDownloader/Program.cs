@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace TrailerDownloader
 {
@@ -8,6 +9,13 @@ namespace TrailerDownloader
     {
         public static void Main(string[] args)
         {
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.File("logs.log")
+                .WriteTo.Console()
+                .CreateLogger();
+            
+            Log.Information("Starting application...");
+            
             CreateHostBuilder(args).Build().Run();
         }
 

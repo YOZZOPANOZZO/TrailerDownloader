@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -9,6 +8,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Flurl.Http;
+using Serilog;
 using TrailerDownloader.Models;
 using TrailerDownloader.Models.DTOs;
 using YoutubeExplode;
@@ -18,22 +18,18 @@ namespace TrailerDownloader.SignalRHubs
 {
     public class MovieHub : Hub
     {
-        private readonly ILogger<MovieHub> _logger;
         private static IHubContext<MovieHub> _hubContext;
         private static readonly ConcurrentDictionary<string, Movie> _movieDictionary = new();
 
         private static readonly string _apiKey = "e438e2812f17faa299396505f2b375bb";
         private static readonly string _configPath = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
-        private static readonly List<string> _excludedFileExtensions = new() { ".srt", ".sub", ".sbv", ".ssa", ".SRT2UTF-8", ".STL", ".png", ".jpg", ".jpeg", ".png", ".gif", ".svg", ".tif", ".tif", ".txt", ".nfo" };
+        private static readonly List<string> _excludedFileExtensions = new() { ".srt", ".sub", ".sbv", ".ssa", ".SRT2UTF-8", ".STL", ".png", ".jpg", ".jpeg", ".png", ".gif", ".svg", ".tif", ".tif", ".txt", ".nfo", ".DS_Store" };
         private static string _mainMovieDirectory;
         private static string _trailerLanguage;
         private static readonly List<string> _movieDirectories = new();
 
-        public MovieHub() { }
-
-        public MovieHub(ILogger<MovieHub> logger, IHubContext<MovieHub> hubContext)
+        public MovieHub(IHubContext<MovieHub> hubContext)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
 
             if (File.Exists(_configPath))
@@ -57,7 +53,7 @@ namespace TrailerDownloader.SignalRHubs
                     Movie movie = GetMovieFromDirectory(movieDirectory1);
                     if (movie == null)
                     {
-                        _logger.LogInformation($"No movie found in directory: '{movieDirectory1}'");
+                        Log.Information($"No movie found in directory: '{movieDirectory1}'");
                         continue;
                     }
 
@@ -119,7 +115,7 @@ namespace TrailerDownloader.SignalRHubs
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in GetMovieDirectories()");
+                Log.Error(ex, "Error in GetMovieDirectories()");
             }
         }
 
@@ -192,7 +188,7 @@ namespace TrailerDownloader.SignalRHubs
                 {
                     // Download the stream to file
                     await youtube.Videos.Streams.DownloadAsync(streamInfo, Path.Combine(movie.FilePath, $"{movie.Title} ({movie.Year})-trailer.{streamInfo.Container}"));
-                    _logger.LogInformation($"Successfully downloaded trailer for {movie.Title}");
+                    Log.Information($"Successfully downloaded trailer for {movie.Title}");
                     return true;
                 }
 
@@ -200,7 +196,7 @@ namespace TrailerDownloader.SignalRHubs
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error downloading trailer for {movie.Title}\n{ex.Message}");
+                Log.Error($"Error downloading trailer for {movie.Title}\n{ex.Message}");
                 await _hubContext.Clients.All.SendAsync("downloadAllTrailers", movie);
                 return false;
             }
@@ -236,7 +232,7 @@ namespace TrailerDownloader.SignalRHubs
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error getting movie info for {movie.Title}\n{ex.Message}");
+                Log.Error(ex, $"Error getting movie info for {movie.Title}\n{ex.Message}");
                 return null;
             }
         }
