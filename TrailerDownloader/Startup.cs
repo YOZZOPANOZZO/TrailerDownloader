@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using TrailerDownloader.Repositories;
+using TrailerDownloader.Services;
 using TrailerDownloader.SignalRHubs;
 
 namespace TrailerDownloader
@@ -32,17 +33,15 @@ namespace TrailerDownloader
             });
 
             services.AddControllersWithViews();
-
-            services.AddHttpClient();
-
+            
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
                 configuration.RootPath = "ClientApp/dist";
             });
 
+            services.AddScoped<IConfigService, ConfigService>();
             services.AddScoped<IConfigRepository, ConfigRepository>();
-            services.AddScoped<ITrailerRepository, MovieHub>();
 
             services.AddSignalR(x =>
             {

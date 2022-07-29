@@ -4,5 +4,6 @@
     {
         public string MediaDirectory { get; set; }
         public string TrailerLanguage { get; set; }
+        public bool AutoDownload { get; set; }
     }
 }

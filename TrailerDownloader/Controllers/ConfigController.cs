@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TrailerDownloader.Models;
 using TrailerDownloader.Repositories;
+using TrailerDownloader.Services;
 
 namespace TrailerDownloader.Controllers
 {
@@ -8,10 +9,12 @@ namespace TrailerDownloader.Controllers
     [ApiController]
     public class ConfigController : ControllerBase
     {
+        private readonly IConfigService _configService;
         private readonly IConfigRepository _configRepository;
 
-        public ConfigController(IConfigRepository configRepository)
+        public ConfigController(IConfigService configService, IConfigRepository configRepository)
         {
+            _configService = configService;
             _configRepository = configRepository;
         }
 
@@ -26,7 +29,7 @@ namespace TrailerDownloader.Controllers
         [HttpPost]
         public IActionResult Post(Config configs)
         {
-            return Ok(_configRepository.SaveConfig(configs));
+            return Ok(_configService.SaveConfig(configs));
         }
     }
 }
