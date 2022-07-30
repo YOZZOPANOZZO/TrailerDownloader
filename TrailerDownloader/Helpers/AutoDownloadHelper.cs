@@ -1,23 +1,29 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using Serilog;
 using TrailerDownloader.SignalRHubs;
 
 namespace TrailerDownloader.Helpers
 {
     public static class AutoDownloadHelper
     {
+        public static bool Initiated { get; set; }
+        
         public static void Start(IHubContext<MovieHub> hubContext)
         {
             Task.Run(async () =>
             {
                 while (true)
                 {
+                    Log.Information("Auto download started");
+                    Initiated = true;
+                    
                     var movieHub = new MovieHub(hubContext);
-                    var movies = await movieHub.GetAllMoviesInfo();
-                    movieHub.DownloadAllTrailers(movies);
+                    var movies = await movieHub.GetAllMoviesInfo(false);
+                    movieHub.DownloadAllTrailers(movies, false);
 
-                    await Task.Delay(TimeSpan.FromMinutes(2));
+                    await Task.Delay(TimeSpan.FromSeconds(15));
                 }
             });
         }

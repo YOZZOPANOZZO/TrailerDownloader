@@ -19,6 +19,7 @@ export class SignalrService {
   startConnection = () => {
     this.hubConnection = new signalR.HubConnectionBuilder()
                               .withUrl(window.location.origin + '/moviehub')
+                              .withAutomaticReconnect()
                               .build();
 
     this.hubConnection.start().then(() => {
@@ -68,7 +69,7 @@ export class SignalrService {
   }
 
   private getAllMoviesInfo() {
-    this.hubConnection.invoke('getAllMoviesInfo').catch(err => console.log(err));
+    this.hubConnection.invoke('getAllMoviesInfo', true).catch(err => console.log(err));
   }
 
   private completedAllMoviesInfoListener = () => {

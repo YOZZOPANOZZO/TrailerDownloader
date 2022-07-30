@@ -21,6 +21,8 @@ namespace TrailerDownloader.Services
         {
             if (config.AutoDownload)
                 AutoDownloadHelper.Start(_hubContext);
+            else
+                AutoDownloadHelper.Initiated = false;
 
             return _configRepository.SaveConfig(config);
         }
