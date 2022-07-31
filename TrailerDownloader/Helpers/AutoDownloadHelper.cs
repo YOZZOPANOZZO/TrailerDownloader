@@ -14,8 +14,15 @@ namespace TrailerDownloader.Helpers
         {
             Task.Run(async () =>
             {
+                var firstTime = true;
+                
                 while (true)
                 {
+                    if (firstTime)
+                        await Task.Delay(TimeSpan.FromSeconds(10));
+
+                    firstTime = false;
+                    
                     Log.Information("Auto download started");
                     Initiated = true;
                     
