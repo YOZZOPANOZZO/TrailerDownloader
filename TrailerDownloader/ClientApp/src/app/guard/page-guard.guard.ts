@@ -9,8 +9,7 @@ import { ConfigService } from '../services/config.service';
 })
 export class PageGuardGuard implements CanActivate {
 
-  config: Config;
-  test: any = {};
+  static config: Config;
 
   constructor(private router: Router, private configService: ConfigService) {}
 
@@ -20,6 +19,7 @@ export class PageGuardGuard implements CanActivate {
 
       return this.configService.getConfig().toPromise().then(res => {
         if (res) {
+          PageGuardGuard.config = res;
           return true;
         }
         else {
@@ -28,28 +28,6 @@ export class PageGuardGuard implements CanActivate {
           return false;
         }
       });
-
-      // var x = this.configService.getConfig().subscribe(data => {
-      //   this.config = data;
-      //   // console.log(this.config);
-      //   return data;
-      // });
-
-      // if (this.getConfig()) {
-      //   return true;
-      // }
-      // else {
-      //   this.router.navigate(['setup']);
-      //   return false;
-      // }
-
-      // if (this.configService.doesConfigExist()) {
-      //   return true;
-      // }
-      // else {
-      //   this.router.navigate(['setup']);
-      //   return false;
-      // }
   }
 
 }

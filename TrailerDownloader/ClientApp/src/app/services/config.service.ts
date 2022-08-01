@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
-import { NgForm } from '@angular/forms';
 import { Setup } from '../models/setup';
+import { Config } from '../models/config';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +13,7 @@ export class ConfigService {
   constructor(private http: HttpClient) { }
 
   getConfig() {
-    return this.http.get(this.configEndpoint);
+    return this.http.get<Config>(this.configEndpoint);
   }
 
   saveConfig(setup: Setup) {

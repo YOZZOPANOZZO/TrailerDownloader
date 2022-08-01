@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
+import { PageGuardGuard } from '../guard/page-guard.guard';
 import { Movie } from '../models/movie';
 import { SignalrService } from '../services/signalr.service';
 
@@ -9,6 +10,8 @@ import { SignalrService } from '../services/signalr.service';
   styleUrls: ['./movies.component.scss']
 })
 export class MoviesComponent implements OnInit {
+
+  autoDownload: boolean = PageGuardGuard.config.autoDownload;
 
   constructor(private toastr: ToastrService,
               public signalrService: SignalrService) {}

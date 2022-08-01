@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { PageGuardGuard } from '../guard/page-guard.guard';
 import { Movie } from "../models/movie";
 import { SignalrService } from '../services/signalr.service';
 
@@ -10,6 +11,8 @@ import { SignalrService } from '../services/signalr.service';
 export class MovieComponent implements OnInit {
 
   @Input() movieInfo: Movie;
+
+  autoDownload = PageGuardGuard.config.autoDownload;
 
   constructor(private signalrService: SignalrService) { }
 

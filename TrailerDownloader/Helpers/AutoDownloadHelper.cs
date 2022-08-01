@@ -19,7 +19,7 @@ namespace TrailerDownloader.Helpers
                 while (true)
                 {
                     if (firstTime)
-                        await Task.Delay(TimeSpan.FromSeconds(10));
+                        await Task.Delay(TimeSpan.FromSeconds(30));
 
                     firstTime = false;
                     

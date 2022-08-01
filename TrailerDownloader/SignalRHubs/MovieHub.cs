@@ -9,7 +9,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Serilog;
-using TrailerDownloader.Helpers;
 using TrailerDownloader.Models;
 using TrailerDownloader.Models.DTOs;
 using YoutubeExplode;
@@ -45,9 +44,6 @@ namespace TrailerDownloader.SignalRHubs
 
         public async Task<List<Movie>> GetAllMoviesInfo(bool sendToClient = true)
         {
-            if (!AutoDownloadHelper.Initiated && _config.AutoDownload)
-                AutoDownloadHelper.Start(_hubContext);
-            
             GetMovieDirectories(_mainMovieDirectory);
             List<Task<Movie>> taskList = new List<Task<Movie>>();
 
@@ -72,7 +68,7 @@ namespace TrailerDownloader.SignalRHubs
                     }
                     else
                     {
-                        taskList.Add(GetMovieInfoAsync(movie, sendToClient));
+                        taskList.Add(GetMovieInfoAsync(movie));
                     }
                 }
             }
@@ -92,7 +88,7 @@ namespace TrailerDownloader.SignalRHubs
 
             if (sendToClient)
                 await _hubContext.Clients.All.SendAsync("completedAllMoviesInfo", _movieBag.Count);
-
+            
             return _movieBag.ToList();
         }
 
@@ -212,7 +208,7 @@ namespace TrailerDownloader.SignalRHubs
             }
         }
 
-        private async Task<Movie> GetMovieInfoAsync(Movie movie, bool sendToClient = true)
+        private async Task<Movie> GetMovieInfoAsync(Movie movie)
         {
             try
             {
@@ -236,8 +232,7 @@ namespace TrailerDownloader.SignalRHubs
 
                 movie.TrailerURL = await GetTrailerURL(movie.Id);
                 
-                if (sendToClient)
-                    await _hubContext.Clients.All.SendAsync("getAllMoviesInfo", movie);
+                await _hubContext.Clients.All.SendAsync("getAllMoviesInfo", movie);
 
                 var bagMovie = _movieBag.FirstOrDefault(x => x.Title == movie.Title);
                 if (bagMovie == null)

@@ -1,9 +1,9 @@
 <div class="container">
   <div class="d-grid gap-2">
-    <button [disabled]="!signalrService.allMoviesLoaded" class="btn btn-primary mt-3 mb-4" (click)="downloadAllTrailers(signalrService.movieList)">
+    <button [disabled]="!signalrService.allMoviesLoaded || autoDownload" class="btn btn-primary mt-3 mb-4" (click)="downloadAllTrailers(signalrService.movieList)">
       Download all missing trailers
     </button>
-    <button [disabled]="signalrService.trailersToDownload.length === 0" class="btn btn-secondary mb-4 center-block col" (click)="downloadAllTrailers(signalrService.trailersToDownload)">
+    <button [disabled]="signalrService.trailersToDownload.length === 0 || autoDownload" class="btn btn-secondary mb-4 center-block col" (click)="downloadAllTrailers(signalrService.trailersToDownload)">
       Download selected trailers
     </button>
   </div>
