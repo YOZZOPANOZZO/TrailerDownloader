@@ -45,6 +45,9 @@ namespace TrailerDownloader.SignalRHubs
 
         public async Task<List<Movie>> GetAllMoviesInfo(bool sendToClient = true)
         {
+            if (_config.AutoDownload && !AutoDownloadHelper.Initiated)
+                AutoDownloadHelper.Start(_hubContext);
+                
             GetMovieDirectories(_mainMovieDirectory);
             List<Task<Movie>> taskList = new List<Task<Movie>>();
 
