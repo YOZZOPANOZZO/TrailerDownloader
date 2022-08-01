@@ -8,23 +8,28 @@ namespace TrailerDownloader.Helpers
 {
     public static class AutoDownloadHelper
     {
-        public static bool Initiated { get; set; }
-        
+        public static bool LoadedFirstTime { get; set; }
+
         public static void Start(IHubContext<MovieHub> hubContext)
         {
             Task.Run(async () =>
             {
-                var firstTime = true;
+                // var firstTime = true;
                 
                 while (true)
                 {
-                    if (firstTime)
-                        await Task.Delay(TimeSpan.FromSeconds(30));
+                    if (!LoadedFirstTime)
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(1));
+                        continue;
+                    }
 
-                    firstTime = false;
+                    // if (firstTime)
+                    //     await Task.Delay(TimeSpan.FromSeconds(30));
+
+                    // firstTime = false;
                     
                     Log.Information("Auto download started");
-                    Initiated = true;
                     
                     var movieHub = new MovieHub(hubContext);
                     var movies = await movieHub.GetAllMoviesInfo(false);

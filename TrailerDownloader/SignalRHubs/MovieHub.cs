@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Serilog;
+using TrailerDownloader.Helpers;
 using TrailerDownloader.Models;
 using TrailerDownloader.Models.DTOs;
 using YoutubeExplode;
@@ -88,6 +89,8 @@ namespace TrailerDownloader.SignalRHubs
 
             if (sendToClient)
                 await _hubContext.Clients.All.SendAsync("completedAllMoviesInfo", _movieBag.Count);
+
+            AutoDownloadHelper.LoadedFirstTime = true;
             
             return _movieBag.ToList();
         }
