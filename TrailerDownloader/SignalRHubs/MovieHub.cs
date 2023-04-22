@@ -179,23 +179,49 @@ namespace TrailerDownloader.SignalRHubs
 
         private async Task<bool> DownloadTrailerAsync(Movie movie)
         {
-            try
-            {
+            try {
                 YoutubeClient youtube = new YoutubeClient();
                 StreamManifest streamManifest = await youtube.Videos.Streams.GetManifestAsync(movie.TrailerURL);
 
-                // Get highest quality muxed stream
-                IVideoStreamInfo streamInfo = streamManifest.GetMuxedStreams().GetWithHighestVideoQuality();
+                // Get highest bitrate audio stream
 
-                if (streamInfo != null)
-                {
+                IAudioStreamInfo audioStreamInfo = (IAudioStreamInfo) streamManifest.GetAudioStreams().GetWithHighestBitrate();
+
+                // try to get 1080p stream
+
+                IVideoStreamInfo videoStreamInfo;
+                try {
+                    videoStreamInfo = streamManifest.GetVideoStreams().First(s => s.VideoQuality.Label == "1080p");
+
+                } catch (Exception ex) {
+                    try {
+                    videoStreamInfo = streamManifest.GetVideoStreams().First(s => s.VideoQuality.Label == "720p");
+                    } catch (Exception ex2) {
+                    videoStreamInfo = streamManifest.GetVideoStreams().First(s => s.VideoQuality.Label == "480p");
+                    }
+                }
+
+                // mux the two streams together into one file
+
+                var streamInfos = new IStreamInfo[] {
+                    audioStreamInfo,
+                    videoStreamInfo
+                };
+
+                //  IVideoStreamInfo streamInfo = streamManifest.GetMuxedStreams().GetWithHighestVideoQuality();
+
+                if (audioStreamInfo != null && videoStreamInfo != null) {
+
                     // Download the stream to file
-                    await youtube.Videos.Streams.DownloadAsync(streamInfo, Path.Combine(movie.FilePath, $"{movie.Title} ({movie.Year})-trailer.{streamInfo.Container}"));
+
+                    await youtube.Videos.DownloadAsync(streamInfos, new ConversionRequestBuilder(Path.Combine(movie.FilePath, $ "{movie.Title} ({movie.Year})-trailer.{videoStreamInfo.Container}")).Build());
+
                     _logger.LogInformation($"Successfully downloaded trailer for {movie.Title}");
                     return true;
                 }
 
-                return false;
+            return false;
+            
             }
             catch (Exception ex)
             {
